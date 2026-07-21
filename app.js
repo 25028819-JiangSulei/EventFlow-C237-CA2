@@ -404,8 +404,49 @@ app.get('/events/view/:id', isLoggedIn, (req, res) => {
       
       res.render('eventDetails', { 
           event: eventResults[0], 
-          isRegistered: isRegistered // 把状态传给前台判断显示什么按钮
+          isRegistered: isRegistered 
       });
     });
+  });
+});
+// 3. Register for an event 
+app.post('/events/:id/register', isLoggedIn, (req, res) => {
+  const eventId = req.params.id;
+  const userId = req.session.user.user_id;
+
+  const sql = 'INSERT INTO registrations (event_id, user_id) VALUES (?, ?)';
+  
+  db.query(sql, [eventId, userId], (err, result) => {
+    if (err) {
+      
+      if (err.code === 'ER_DUP_ENTRY') {
+        req.flash('error', 'You are already registered for this event.');
+      } else {
+        console.log('Registration error:', err);
+        req.flash('error', 'Registration failed.');
+      }
+    } else {
+      req.flash('success', 'Successfully registered for the event!');
+    }
+
+    res.redirect('/events/view/' + eventId);
+  });
+});
+
+// 4. Cancel Registration 
+app.post('/events/:id/cancel', isLoggedIn, (req, res) => {
+  const eventId = req.params.id;
+  const userId = req.session.user.user_id;
+
+  const sql = 'DELETE FROM registrations WHERE event_id = ? AND user_id = ?';
+  
+  db.query(sql, [eventId, userId], (err, result) => {
+    if (err) {
+      console.log('Cancellation error:', err);
+      req.flash('error', 'Cancellation failed.');
+    } else {
+      req.flash('success', 'Successfully cancelled your registration.');
+    }
+    res.redirect('/events/view/' + eventId);
   });
 });
