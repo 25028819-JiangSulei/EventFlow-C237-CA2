@@ -24,20 +24,40 @@
                 <p><i class="bi bi-clock"></i> <strong>Time:</strong> <%= event.event_time %></p>
                 <p><i class="bi bi-geo-alt"></i> <strong>Location:</strong> <%= event.location %></p>
             </div>
-            <div class="card-footer d-flex justify-content-between">
+            
+            <div class="card-footer d-flex justify-content-between align-items-center">
                 <a href="/events/view" class="btn btn-secondary">
                     <i class="bi bi-arrow-left"></i> Back to All Events
                 </a>
-                <% if (user && user.role === 'admin') { %>
-                    <div class="d-flex gap-2">
+                
+                <div class="d-flex gap-2 align-items-center">
+                    <% if (user && user.role === 'admin') { %>
                         <a href="/events/edit/<%= event.event_id %>" class="btn btn-primary">
                             <i class="bi bi-pencil-square"></i> Edit
                         </a>
                         <a href="/events/delete/<%= event.event_id %>" class="btn btn-danger">
                             <i class="bi bi-trash"></i> Delete
                         </a>
-                    </div>
-                <% } %>
+                    <% } else if (user && user.role === 'user') { %>
+                        
+                        <% if (typeof isRegistered !== 'undefined' && isRegistered) { %>
+                            <span class="text-success fw-bold me-2">
+                                <i class="bi bi-check-circle-fill"></i> Registered
+                            </span>
+                            <form action="/events/<%= event.event_id %>/cancel" method="POST" class="m-0">
+                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Are you sure you want to cancel your registration?');">
+                                    <i class="bi bi-x-circle"></i> Cancel Registration
+                                </button>
+                            </form>
+                        <% } else { %>
+                            <form action="/events/<%= event.event_id %>/register" method="POST" class="m-0">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-person-plus"></i> Register Now
+                                </button>
+                            </form>
+                        <% } %> 
+                    <% } %>
+                </div> 
             </div>
         </div>
     </div>
