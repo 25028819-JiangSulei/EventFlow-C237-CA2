@@ -381,3 +381,31 @@ app.get('/events/view', isLoggedIn, (req, res) => {
     });
   });
 });
+// 2. View single event details 
+app.get('/events/view/:id', isLoggedIn, (req, res) => {
+  const eventId = req.params.id;
+  const userId = req.session.user.user_id;
+
+  const sqlEvent = 'SELECT * FROM events WHERE event_id = ?';
+  const sqlCheckReg = 'SELECT * FROM registrations WHERE event_id = ? AND user_id = ?';
+
+  db.query(sqlEvent, [eventId], (err, eventResults) => {
+    if (err) {
+      console.log('Error fetching event:', err);
+      req.flash('error', 'Unable to load event');
+      return res.redirect('/events/view');
+    }
+    if (eventResults.length === 0) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events/view');
+    }
+    db.query(sqlCheckReg, [eventId, userId], (err, regResults) => {
+      const isRegistered = regResults && regResults.length > 0;
+      
+      res.render('eventDetails', { 
+          event: eventResults[0], 
+          isRegistered: isRegistered // 把状态传给前台判断显示什么按钮
+      });
+    });
+  });
+});
