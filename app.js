@@ -44,7 +44,6 @@ db.connect((err) => {
   }
 });
 
-
 function isLoggedIn(req, res, next) {
   if (req.session.user) {
     return next();
@@ -60,7 +59,6 @@ function isAdmin(req, res, next) {
   req.flash('error', 'Access denied. Admins only.');
   res.redirect('/events');
 }
-
 
 app.get('/register', (req, res) => {
   res.render('register');
