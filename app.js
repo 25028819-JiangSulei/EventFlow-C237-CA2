@@ -206,6 +206,41 @@ app.post('/events/create', isLoggedIn, (req, res) => {
     }
 
     req.flash('success', 'Event created successfully!');
-    res.redirect('/events');
+    res.redirect('/events/view/' + result.insertId);
+});
+
+// View all events
+app.get('/events/view', isLoggedIn, (req, res) => {
+  const sql = 'SELECT * FROM events ORDER BY event_date ASC, event_time ASC';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.log('Error fetching events:', err);
+      req.flash('error', 'Unable to load events');
+      return res.redirect('/events');
+    }
+
+    res.render('viewEvents', { events: results });
+  });
+});
+
+// View single event details
+app.get('/events/view/:id', isLoggedIn, (req, res) => {
+  const eventId = req.params.id;
+  const sql = 'SELECT * FROM events WHERE event_id = ?';
+
+  db.query(sql, [eventId], (err, results) => {
+    if (err) {
+      console.log('Error fetching event:', err);
+      req.flash('error', 'Unable to load event');
+      return res.redirect('/events/view');
+    }
+
+    if (results.length === 0) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events/view');
+    }
+
+    res.render('eventDetails', { event: results[0] });
   });
 });
