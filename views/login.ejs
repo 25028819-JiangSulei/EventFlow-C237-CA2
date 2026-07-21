@@ -10,8 +10,6 @@
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
     }
     .login-card {
       border: none;
@@ -32,8 +30,11 @@
   </style>
 </head>
 <body>
+
+  <%- include('partials/header') %>
+
   <div class="container">
-    <div class="row justify-content-center">
+    <div class="row justify-content-center align-items-center" style="min-height: 80vh;">
       <div class="col-md-5 col-lg-4">
         <div class="card login-card">
           <div class="card-body p-4 p-md-5">
@@ -80,5 +81,8 @@
       </div>
     </div>
   </div>
+
+  <%- include('partials/footer') %>
+
 </body>
 </html>
