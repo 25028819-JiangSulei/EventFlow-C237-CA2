@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Dashboard</title>
+</head>
+
+<body>
+
+    <h1>Event Management Dashboard</h1>
+
+    <hr>
+
+    <h3>Welcome, <%= user.full_name %>!</h3>
+
+    <p>Select an option below:</p>
+
+    <br>
+
+    <a href="/events/create">
+        <button>Create Event</button>
+    </a>
+
+    <br><br>
+
+    <a href="#">
+        <button>View Events</button>
+    </a>
+
+    <br><br>
+
+    <a href="#">
+        <button>Edit Event</button>
+    </a>
+
+    <br><br>
+
+    <a href="#">
+        <button>Delete Event</button>
+    </a>
+
+    <br><br>
+
+    <% if (success && success.length > 0) { %>
+        <p style="color: green;">
+            <%= success[0] %>
+        </p>
+    <% } %>
+
+    <% if (error && error.length > 0) { %>
+        <p style="color: red;">
+            <%= error[0] %>
+        </p>
+    <% } %>
+
+    <br>
+
+    <a href="/logout">
+        <button>Logout</button>
+    </a>
+
+</body>
+
+</html>
