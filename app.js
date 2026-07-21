@@ -4,12 +4,14 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const bcrypt = require('bcrypt');
 const path = require('path');
+const methodOverride = require('method-override');
 
 const app = express();
 
 app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+app.use(methodOverride('_method'));
 
 app.use(session({
   secret: 'eventflow_secret_key_2026',
@@ -207,6 +209,7 @@ app.post('/events/create', isLoggedIn, (req, res) => {
 
     req.flash('success', 'Event created successfully!');
     res.redirect('/events/view/' + result.insertId);
+    });
 });
 
 // View all events
