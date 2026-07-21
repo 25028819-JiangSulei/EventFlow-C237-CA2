@@ -351,3 +351,33 @@ app.post('/events/delete/:id', isAdmin, (req, res) => {
     res.redirect('/events/view');
   });
 });
+
+//Event Registration + Search & Filter
+// 1. View all events 
+app.get('/events/view', isLoggedIn, (req, res) => {
+  const { search, category } = req.query;
+  let sql = 'SELECT * FROM events WHERE 1=1';
+  const params = [];
+  if (search) {
+    sql += ' AND (event_name LIKE ? OR description LIKE ?)';
+    params.push(`%${search}%`, `%${search}%`);
+  }
+  if (category) {
+    sql += ' AND category = ?';
+    params.push(category);
+  }
+  sql += ' ORDER BY event_date ASC, event_time ASC';
+
+  db.query(sql, params, (err, results) => {
+    if (err) {
+      console.log('Error fetching events:', err);
+      req.flash('error', 'Unable to load events');
+      return res.redirect('/events');
+    }
+    res.render('viewEvents', { 
+        events: results, 
+        searchQuery: search || '', 
+        selectedCategory: category || '' 
+    });
+  });
+});
