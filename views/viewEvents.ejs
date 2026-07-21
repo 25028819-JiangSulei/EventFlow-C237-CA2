@@ -6,53 +6,67 @@
     <title>All Events - EventFlow</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
     <%- include('partials/header') %>
 
     <!-- ========== Your page content starts here ========== -->
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1>All Events</h1>
-            <a href="/events" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
-        </div>
-
-        <% if (events.length === 0) { %>
-            <div class="alert alert-info">No events found.</div>
-        <% } else { %>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Event Name</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Location</th>
-                            <th>Category</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% events.forEach(function(event) { %>
-                            <tr>
-                                <td><%= event.event_name %></td>
-                                <td><%= event.event_date %></td>
-                                <td><%= event.event_time %></td>
-                                <td><%= event.location %></td>
-                                <td><span class="badge bg-primary"><%= event.category %></span></td>
-                                <td>
-                                    <a href="/events/view/<%= event.event_id %>" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> View Details
-                                    </a>
-                                </td>
-                            </tr>
-                        <% }); %>
-                    </tbody>
-                </table>
+    <div class="container py-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h1 class="h4 mb-0"><i class="bi bi-list-ul"></i> All Events</h1>
+                <a href="/events" class="btn btn-light btn-sm fw-semibold">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
             </div>
-        <% } %>
+            <div class="card-body">
+                <% if (events.length === 0) { %>
+                    <div class="alert alert-info mb-0">No events found.</div>
+                <% } else { %>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Location</th>
+                                    <th>Category</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% events.forEach(function(event) { %>
+                                    <tr>
+                                        <td><%= event.event_name %></td>
+                                        <td><%= event.event_date %></td>
+                                        <td><%= event.event_time %></td>
+                                        <td><%= event.location %></td>
+                                        <td><span class="badge bg-primary"><%= event.category %></span></td>
+                                        <td>
+                                            <div class="d-flex gap-1">
+                                                <a href="/events/view/<%= event.event_id %>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> View
+                                                </a>
+                                                <% if (user && user.role === 'admin') { %>
+                                                    <a href="/events/edit/<%= event.event_id %>" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-pencil-square"></i> Edit
+                                                    </a>
+                                                    <a href="/events/delete/<%= event.event_id %>" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </a>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+        </div>
     </div>
     <!-- ========== Your page content ends here ========== -->
 

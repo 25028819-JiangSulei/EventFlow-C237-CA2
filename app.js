@@ -247,3 +247,107 @@ app.get('/events/view/:id', isLoggedIn, (req, res) => {
     res.render('eventDetails', { event: results[0] });
   });
 });
+
+// Show edit form for an event
+app.get('/events/edit/:id', isAdmin, (req, res) => {
+  const eventId = req.params.id;
+  const sql = 'SELECT * FROM events WHERE event_id = ?';
+
+  db.query(sql, [eventId], (err, results) => {
+    if (err) {
+      console.log('Error fetching event:', err);
+      req.flash('error', 'Unable to load event');
+      return res.redirect('/events/view');
+    }
+
+    if (results.length === 0) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events/view');
+    }
+
+    res.render('editEvent', { event: results[0] });
+  });
+});
+
+// Save changes to an event
+app.post('/events/edit/:id', isAdmin, (req, res) => {
+  const eventId = req.params.id;
+  const {
+    event_name,
+    description,
+    event_date,
+    event_time,
+    location,
+    category
+  } = req.body;
+
+  if (!event_name || !event_date || !event_time || !location || !category) {
+    req.flash('error', 'Please fill in all required fields');
+    return res.redirect('/events/edit/' + eventId);
+  }
+
+  const sql = `
+    UPDATE events
+    SET event_name = ?, description = ?, event_date = ?, event_time = ?, location = ?, category = ?
+    WHERE event_id = ?
+  `;
+
+  const values = [
+    event_name,
+    description,
+    event_date,
+    event_time,
+    location,
+    category,
+    eventId
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.log('Error updating event:', err);
+      req.flash('error', 'Unable to update event');
+      return res.redirect('/events/edit/' + eventId);
+    }
+
+    req.flash('success', 'Event updated successfully!');
+    res.redirect('/events/view/' + eventId);
+  });
+});
+
+// Show delete confirmation page for an event
+app.get('/events/delete/:id', isAdmin, (req, res) => {
+  const eventId = req.params.id;
+  const sql = 'SELECT * FROM events WHERE event_id = ?';
+
+  db.query(sql, [eventId], (err, results) => {
+    if (err) {
+      console.log('Error fetching event:', err);
+      req.flash('error', 'Unable to load event');
+      return res.redirect('/events/view');
+    }
+
+    if (results.length === 0) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events/view');
+    }
+
+    res.render('deleteEvent', { event: results[0] });
+  });
+});
+
+// Delete an event
+app.post('/events/delete/:id', isAdmin, (req, res) => {
+  const eventId = req.params.id;
+  const sql = 'DELETE FROM events WHERE event_id = ?';
+
+  db.query(sql, [eventId], (err, result) => {
+    if (err) {
+      console.log('Error deleting event:', err);
+      req.flash('error', 'Unable to delete event');
+      return res.redirect('/events/view');
+    }
+
+    req.flash('success', 'Event deleted successfully!');
+    res.redirect('/events/view');
+  });
+});
