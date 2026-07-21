@@ -142,3 +142,70 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+
+//part b: event + dashboard
+
+// Dashboard
+app.get('/events', isLoggedIn, (req, res) => {
+    res.render('dashboard');
+});
+
+// Create Event page
+app.get('/events/create', isLoggedIn, (req, res) => {
+    res.render('createEvent');
+});
+
+// Save new event into database
+app.post('/events/create', isLoggedIn, (req, res) => {
+  const {
+    event_name,
+    description,
+    event_date,
+    event_time,
+    location,
+    category
+  } = req.body;
+
+  if (!event_name || !event_date || !event_time || !location || !category) {
+    req.flash('error', 'Please fill in all required fields');
+    return res.redirect('/events/create');
+  }
+
+  const created_by = req.session.user.user_id;
+
+  const sql = `
+    INSERT INTO events
+    (
+      event_name,
+      description,
+      event_date,
+      event_time,
+      location,
+      category,
+      created_by
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    event_name,
+    description,
+    event_date,
+    event_time,
+    location,
+    category,
+    created_by
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.log('Error creating event:', err);
+      req.flash('error', 'Unable to create event');
+      return res.redirect('/events/create');
+    }
+
+    req.flash('success', 'Event created successfully!');
+    res.redirect('/events');
+  });
+});
