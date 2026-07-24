@@ -422,6 +422,7 @@ app.get('/events/view/:id', isLoggedIn, (req, res) => {
 
   const sqlEvent = 'SELECT * FROM events WHERE event_id = ?';
   const sqlCheckReg = 'SELECT * FROM registrations WHERE event_id = ? AND user_id = ?';
+  const sqlCountReg = 'SELECT COUNT(*) AS total FROM registrations WHERE event_id = ?';
 
   db.query(sqlEvent, [eventId], (err, eventResults) => {
     if (err) {
@@ -435,24 +436,73 @@ app.get('/events/view/:id', isLoggedIn, (req, res) => {
       return res.redirect('/events/view');
     }
 
-    db.query(sqlCheckReg, [eventId, userId], (err, regResults) => {
-      if (err) {
-        console.log('Error checking registration status:', err);
-        return res.render('eventDetails', { 
-          event: eventResults[0], 
-          isRegistered: false 
-        });
-      }
+    db.query(sqlCountReg, [eventId], (countErr, countResults) => {
+      const registrationCount = countErr || !countResults || !countResults[0]
+        ? 0
+        : Number(countResults[0].total || 0);
 
-      const isRegistered = regResults && regResults.length > 0;
-      
-      res.render('eventDetails', { 
-          event: eventResults[0], 
-          isRegistered: isRegistered 
+      db.query(sqlCheckReg, [eventId, userId], (err, regResults) => {
+        if (err) {
+          console.log('Error checking registration status:', err);
+          return res.render('eventDetails', { 
+            event: eventResults[0], 
+            isRegistered: false,
+            registrationCount: registrationCount
+          });
+        }
+
+        const isRegistered = regResults && regResults.length > 0;
+        
+        res.render('eventDetails', { 
+            event: eventResults[0], 
+            isRegistered: isRegistered,
+            registrationCount: registrationCount
+        });
       });
     });
   });
 });
+
+// 3. View event attendees (admin only)
+app.get('/events/:id/attendees', isAdmin, (req, res) => {
+  const eventId = req.params.id;
+  const sqlEvent = 'SELECT * FROM events WHERE event_id = ?';
+  const sqlColumns = 'SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ?';
+
+  db.query(sqlEvent, [eventId], (err, eventResults) => {
+    if (err) {
+      console.log('Error fetching event:', err);
+      req.flash('error', 'Unable to load event attendees');
+      return res.redirect('/events');
+    }
+
+    if (eventResults.length === 0) {
+      req.flash('error', 'Event not found');
+      return res.redirect('/events');
+    }
+
+    db.query(sqlColumns, ['registrations'], (columnErr, columnResults) => {
+      const hasRegisteredAt = !columnErr && columnResults.some((column) => column.COLUMN_NAME === 'registered_at');
+      const baseSelect = hasRegisteredAt ? 'SELECT u.full_name, u.email, r.registered_at' : 'SELECT u.full_name, u.email';
+      const sqlAttendees = `${baseSelect} FROM registrations r JOIN users u ON u.user_id = r.user_id WHERE r.event_id = ? ORDER BY u.full_name ASC`;
+
+      db.query(sqlAttendees, [eventId], (attendeeErr, attendeeResults) => {
+        if (attendeeErr) {
+          console.log('Error fetching attendees:', attendeeErr);
+          req.flash('error', 'Unable to load attendees');
+          return res.redirect('/events/view/' + eventId);
+        }
+
+        res.render('attendees', {
+          event: eventResults[0],
+          attendees: attendeeResults || [],
+          hasRegisteredAt: hasRegisteredAt
+        });
+      });
+    });
+  });
+});
+
 // 3. Register for an event 
 app.post('/events/:id/register', isLoggedIn, (req, res) => {
   const eventId = req.params.id;

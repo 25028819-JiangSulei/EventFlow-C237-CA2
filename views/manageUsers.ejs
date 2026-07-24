@@ -12,11 +12,11 @@
     <%- include('partials/header') %>
 
     <div class="container py-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light border-bottom">
                 <h1 class="h4 mb-0"><i class="bi bi-people"></i> Manage Users</h1>
                 <a href="/events" class="btn btn-light btn-sm fw-semibold">
-                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                    <i class="bi bi-arrow-left"></i> Dashboard
                 </a>
             </div>
             <div class="card-body">
@@ -45,14 +45,14 @@
                             <tbody>
                                 <% users.forEach(function(u) { %>
                                     <tr>
-                                        <td><%= u.full_name %></td>
-                                        <td><%= u.email %></td>
-                                        <td>
+                                        <td data-label="Name"><%= u.full_name %></td>
+                                        <td data-label="Email"><%= u.email %></td>
+                                        <td data-label="Role">
                                             <span class="badge <%= u.role === 'admin' ? 'bg-warning text-dark' : 'bg-secondary' %>">
                                                 <%= u.role %>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td data-label="Action">
                                             <% if (u.user_id === user.user_id) { %>
                                                 <span class="text-muted small">This is you</span>
                                             <% } else { %>

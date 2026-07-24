@@ -15,10 +15,11 @@
   <div class="container">
     <div class="row justify-content-center align-items-center py-5">
       <div class="col-md-8 col-lg-6">
-        <div class="card">
-          <div class="card-header text-center py-4">
-            <i class="bi bi-pencil-square display-6"></i>
+        <div class="card border-0 shadow-sm">
+          <div class="card-header text-center py-4 bg-light border-bottom">
+            <i class="bi bi-pencil-square display-6 text-secondary"></i>
             <h3 class="mt-2 fw-bold mb-0">Edit Event</h3>
+            <p class="text-muted mb-0">Update event details with a clean, structured form.</p>
           </div>
           <div class="card-body p-4 p-md-5">
 
@@ -31,91 +32,100 @@
             <% } %>
 
             <form action="/events/edit/<%= event.event_id %>" method="POST">
+              <div class="form-section mb-4">
+                <h5>Event details</h5>
+                <p class="section-subtitle">Update the event name, description, and category clearly.</p>
 
-              <div class="mb-3">
-                <label for="event_name" class="form-label">Event Name</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                  <input
-                    type="text"
-                    id="event_name"
-                    name="event_name"
-                    class="form-control"
-                    value="<%= event.event_name %>"
-                    required
-                  >
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea
-                  id="description"
-                  name="description"
-                  class="form-control"
-                  rows="4"
-                ><%= event.description %></textarea>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="event_date" class="form-label">Event Date</label>
+                <div class="mb-3">
+                  <label for="event_name" class="form-label">Event Name</label>
                   <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
                     <input
-                      type="date"
-                      id="event_date"
-                      name="event_date"
+                      type="text"
+                      id="event_name"
+                      name="event_name"
                       class="form-control"
-                      value="<%= event.event_date instanceof Date ? event.event_date.toISOString().split('T')[0] : event.event_date %>"
+                      value="<%= event.event_name %>"
                       required
                     >
                   </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                  <label for="event_time" class="form-label">Event Time</label>
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    class="form-control"
+                    rows="4"
+                  ><%= event.description %></textarea>
+                </div>
+              </div>
+
+              <div class="form-section mb-4">
+                <h5>Schedule & logistics</h5>
+                <p class="section-subtitle">Refine the date, time, and location for attendees.</p>
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="event_date" class="form-label">Event Date</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                      <input
+                        type="date"
+                        id="event_date"
+                        name="event_date"
+                        class="form-control"
+                        value="<%= event.event_date instanceof Date ? event.event_date.toISOString().split('T')[0] : event.event_date %>"
+                        required
+                      >
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="event_time" class="form-label">Event Time</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                      <input
+                        type="time"
+                        id="event_time"
+                        name="event_time"
+                        class="form-control"
+                        value="<%= event.event_time %>"
+                        required
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                  <label for="location" class="form-label">Location</label>
                   <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-clock"></i></span>
+                    <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
                     <input
-                      type="time"
-                      id="event_time"
-                      name="event_time"
+                      type="text"
+                      id="location"
+                      name="location"
                       class="form-control"
-                      value="<%= event.event_time %>"
+                      value="<%= event.location %>"
                       required
                     >
                   </div>
                 </div>
-              </div>
 
-              <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
-                  <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    class="form-control"
-                    value="<%= event.location %>"
-                    required
-                  >
-                </div>
-              </div>
-
-              <div class="mb-4">
-                <label for="category" class="form-label">Category</label>
-                <div class="input-group">
-                  <span class="input-group-text"><i class="bi bi-tags"></i></span>
-                  <select id="category" name="category" class="form-select" required>
-                    <option value="">Select category</option>
-                    <option value="Workshop" <%= event.category === 'Workshop' ? 'selected' : '' %>>Workshop</option>
-                    <option value="Seminar" <%= event.category === 'Seminar' ? 'selected' : '' %>>Seminar</option>
-                    <option value="Sports" <%= event.category === 'Sports' ? 'selected' : '' %>>Sports</option>
-                    <option value="Entertainment" <%= event.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
-                    <option value="Others" <%= event.category === 'Others' ? 'selected' : '' %>>Others</option>
-                  </select>
+                <div class="mb-0">
+                  <label for="category" class="form-label">Category</label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-tags"></i></span>
+                    <select id="category" name="category" class="form-select" required>
+                      <option value="">Select category</option>
+                      <option value="Workshop" <%= event.category === 'Workshop' ? 'selected' : '' %>>Workshop</option>
+                      <option value="Seminar" <%= event.category === 'Seminar' ? 'selected' : '' %>>Seminar</option>
+                      <option value="Sports" <%= event.category === 'Sports' ? 'selected' : '' %>>Sports</option>
+                      <option value="Entertainment" <%= event.category === 'Entertainment' ? 'selected' : '' %>>Entertainment</option>
+                      <option value="Others" <%= event.category === 'Others' ? 'selected' : '' %>>Others</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

@@ -14,11 +14,16 @@
 
   <div class="container py-4">
 
-    <div class="card mb-4">
-      <div class="card-body p-4 p-md-5 text-center">
-        <i class="bi bi-calendar-event display-4 text-primary"></i>
-        <h2 class="mt-2 fw-bold">Welcome, <%= user.full_name %>!</h2>
-        <p class="text-muted mb-0">Event Management Dashboard &mdash; select an option below</p>
+    <div class="page-hero mb-4 shadow-sm">
+      <div class="d-flex flex-column flex-md-row align-items-start justify-content-between gap-3">
+        <div>
+          <i class="bi bi-calendar-event display-5 text-secondary"></i>
+          <h2 class="hero-title mt-3 fw-bold">Welcome, <%= user.full_name %>!</h2>
+          <p class="hero-subtitle mb-0">Event Management Dashboard — choose an action to continue.</p>
+        </div>
+        <div class="text-muted small">
+          <p class="mb-1">Admin controls, event browsing, and registration tools in one place.</p>
+        </div>
       </div>
     </div>
 

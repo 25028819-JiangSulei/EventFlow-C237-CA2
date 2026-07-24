@@ -11,7 +11,6 @@
 <body>
     <%- include('partials/header') %>
 
-    <!-- ========== Your page content starts here ========== -->
     <div class="container mt-4">
 
         <% if (success && success.length > 0) { %>
@@ -28,24 +27,87 @@
             </div>
         <% } %>
 
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h1 class="h4 mb-0"><i class="bi bi-calendar-event"></i> <%= event.event_name %></h1>
-                <span class="badge bg-light text-dark"><%= event.category %></span>
+        <div class="page-hero mb-4 shadow-sm">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+            <div>
+              <h1 class="hero-title mb-2"><i class="bi bi-calendar-event me-2"></i> <%= event.event_name %></h1>
+              <p class="hero-subtitle mb-1"><strong>Date:</strong> <%= event.event_date %> &middot; <strong>Time:</strong> <%= event.event_time %></p>
+              <p class="hero-subtitle mb-0"><i class="bi bi-geo-alt"></i> <%= event.location %></p>
             </div>
+            <span class="badge category-badge category-<%= event.category.toLowerCase().replace(/\s+/g, '-') %> align-self-start"><%= event.category %></span>
+          </div>
+        </div>
+
+        <div class="card border-0 shadow-sm detail-panel">
             <div class="card-body">
-                <p><i class="bi bi-card-text"></i> <strong>Description:</strong> <%= event.description %></p>
-                <p><i class="bi bi-calendar-event"></i> <strong>Date:</strong> <%= event.event_date %></p>
-                <p><i class="bi bi-clock"></i> <strong>Time:</strong> <%= event.event_time %></p>
-                <p><i class="bi bi-geo-alt"></i> <strong>Location:</strong> <%= event.location %></p>
+                <div class="detail-row">
+                  <i class="bi bi-people"></i>
+                  <div>
+                    <div class="fw-semibold">Attendance</div>
+                    <span><%= registrationCount %> <%= registrationCount === 1 ? 'person' : 'people' %> registered</span>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <i class="bi bi-card-text"></i>
+                  <div>
+                    <div class="fw-semibold">Description</div>
+                    <span><%= event.description %></span>
+                  </div>
+                </div>
+                <div class="detail-row">
+                  <i class="bi bi-calendar-check"></i>
+                  <div>
+                    <div class="fw-semibold">When</div>
+                    <span><%= event.event_date %> at <%= event.event_time %></span>
+                  </div>
+                </div>
+                <div class="detail-row mb-0">
+                  <i class="bi bi-geo-alt"></i>
+                  <div>
+                    <div class="fw-semibold">Where</div>
+                    <span><%= event.location %></span>
+                  </div>
+                </div>
             </div>
-            
-            <div class="card-footer d-flex justify-content-between align-items-center">
-                <a href="/events/view" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to All Events
-                </a>
-                
-                <div class="d-flex gap-2 align-items-center">
+
+            <div class="card-footer bg-transparent border-0 p-0 mt-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-stretch gap-2">
+                    <a href="/events/view" class="btn btn-secondary w-100 w-md-auto">
+                        <i class="bi bi-arrow-left"></i> Back to All Events
+                    </a>
+                    <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+                        <% if (user && user.role === 'admin') { %>
+                            <a href="/events/<%= event.event_id %>/attendees" class="btn btn-outline-secondary">
+                                <i class="bi bi-people"></i> View Attendees
+                            </a>
+                            <a href="/events/edit/<%= event.event_id %>" class="btn btn-primary">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a href="/events/delete/<%= event.event_id %>" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        <% } else if (user && user.role === 'user') { %>
+                            <% if (typeof isRegistered !== 'undefined' && isRegistered) { %>
+                                <span class="text-success fw-semibold align-self-center">
+                                    <i class="bi bi-check-circle-fill"></i> Registered
+                                </span>
+                                <form action="/events/<%= event.event_id %>/cancel" method="POST" class="m-0">
+                                    <button type="submit" class="btn btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Cancel Registration
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <form action="/events/<%= event.event_id %>/register" method="POST" class="m-0 w-100 w-md-auto">
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="bi bi-person-plus"></i> Register Now
+                                    </button>
+                                </form>
+                            <% } %>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
                     <% if (user && user.role === 'admin') { %>
                         <a href="/events/edit/<%= event.event_id %>" class="btn btn-primary">
                             <i class="bi bi-pencil-square"></i> Edit
