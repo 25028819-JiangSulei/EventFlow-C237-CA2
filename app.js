@@ -213,26 +213,6 @@ app.post('/events/create', isLoggedIn, (req, res) => {
 });
 
 
-// View single event details
-app.get('/events/view/:id', isLoggedIn, (req, res) => {
-  const eventId = req.params.id;
-  const sql = 'SELECT * FROM events WHERE event_id = ?';
-
-  db.query(sql, [eventId], (err, results) => {
-    if (err) {
-      console.log('Error fetching event:', err);
-      req.flash('error', 'Unable to load event');
-      return res.redirect('/events/view');
-    }
-
-    if (results.length === 0) {
-      req.flash('error', 'Event not found');
-      return res.redirect('/events/view');
-    }
-
-    res.render('eventDetails', { event: results[0] });
-  });
-});
 
 // Show edit form for an event
 app.get('/events/edit/:id', isAdmin, (req, res) => {
@@ -381,11 +361,21 @@ app.get('/events/view/:id', isLoggedIn, (req, res) => {
       req.flash('error', 'Unable to load event');
       return res.redirect('/events/view');
     }
+    
     if (eventResults.length === 0) {
       req.flash('error', 'Event not found');
       return res.redirect('/events/view');
     }
+
     db.query(sqlCheckReg, [eventId, userId], (err, regResults) => {
+      if (err) {
+        console.log('Error checking registration status:', err);
+        return res.render('eventDetails', { 
+          event: eventResults[0], 
+          isRegistered: false 
+        });
+      }
+
       const isRegistered = regResults && regResults.length > 0;
       
       res.render('eventDetails', { 
