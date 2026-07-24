@@ -318,6 +318,74 @@ app.post('/events/delete/:id', isAdmin, (req, res) => {
   });
 });
 
+// Manage Users - list all users (Admin only)
+app.get('/admin/users', isAdmin, (req, res) => {
+  const sql = 'SELECT user_id, full_name, email, role FROM users ORDER BY full_name ASC';
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.log('Error fetching users:', err);
+      req.flash('error', 'Unable to load users');
+      return res.redirect('/events');
+    }
+    res.render('manageUsers', { users: results });
+  });
+});
+
+// Show delete confirmation page for a user
+app.get('/admin/users/delete/:id', isAdmin, (req, res) => {
+  const userId = req.params.id;
+
+  if (parseInt(userId) === req.session.user.user_id) {
+    req.flash('error', 'You cannot delete your own account.');
+    return res.redirect('/admin/users');
+  }
+
+  const sql = 'SELECT user_id, full_name, email, role FROM users WHERE user_id = ?';
+
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.log('Error fetching user:', err);
+      req.flash('error', 'Unable to load user');
+      return res.redirect('/admin/users');
+    }
+
+    if (results.length === 0) {
+      req.flash('error', 'User not found');
+      return res.redirect('/admin/users');
+    }
+
+    res.render('deleteUser', { targetUser: results[0] });
+  });
+});
+
+// Delete a user
+app.post('/admin/users/delete/:id', isAdmin, (req, res) => {
+  const userId = req.params.id;
+
+  if (parseInt(userId) === req.session.user.user_id) {
+    req.flash('error', 'You cannot delete your own account.');
+    return res.redirect('/admin/users');
+  }
+
+  const sql = 'DELETE FROM users WHERE user_id = ?';
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.log('Error deleting user:', err);
+      if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.code === 'ER_ROW_IS_REFERENCED') {
+        req.flash('error', 'Cannot delete this user — they still have events or registrations linked to their account.');
+      } else {
+        req.flash('error', 'Unable to delete user');
+      }
+      return res.redirect('/admin/users');
+    }
+
+    req.flash('success', 'User deleted successfully!');
+    res.redirect('/admin/users');
+  });
+});
+
 //Event Registration + Search & Filter
 // 1. View all events 
 app.get('/events/view', isLoggedIn, (req, res) => {
