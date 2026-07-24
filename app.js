@@ -116,15 +116,22 @@ app.post('/login', (req, res) => {
     const match = await bcrypt.compare(password, user.password);
 
     if (match) {
-      req.session.user = {
-        user_id: user.user_id,
-        full_name: user.full_name,
-        email: user.email,
-        role: user.role
-      };
-      req.flash('success', 'Welcome back, ' + user.full_name);
-      res.redirect('/events');
-    } else {
+  req.session.user = {
+    user_id: user.user_id,
+    full_name: user.full_name,
+    email: user.email,
+    role: user.role,
+    preferred_categories: user.preferred_categories
+  };
+  req.flash('success', 'Welcome back, ' + user.full_name);
+
+  if (!user.preferred_categories) {
+    return res.redirect('/preferences');
+  }
+
+  
+  res.redirect('/events');
+} else {
       req.flash('error', 'Invalid email or password');
       res.redirect('/login');
     }
@@ -138,6 +145,67 @@ app.get('/logout', (req, res) => {
 
 app.get('/', (req, res) => {
   res.redirect('/events');
+});
+
+// ========== Preferences & Recommendations ==========
+
+app.get('/preferences', isLoggedIn, (req, res) => {
+  const sql = 'SELECT DISTINCT category FROM events WHERE category IS NOT NULL AND category != "" ORDER BY category';
+  
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    const userCategories = req.session.user.preferred_categories 
+      ? req.session.user.preferred_categories.split(',') 
+      : [];
+
+    res.render('preferences', {
+      categories: results,
+      userCategories: userCategories
+    });
+  });
+});
+
+app.post('/preferences', isLoggedIn, (req, res) => {
+  let selected = req.body.categories;
+
+  if (!selected) {
+    selected = '';
+  } else if (Array.isArray(selected)) {
+    selected = selected.join(',');
+  }
+
+  const sql = 'UPDATE users SET preferred_categories = ? WHERE user_id = ?';
+  db.query(sql, [selected, req.session.user.user_id], (err, result) => {
+    if (err) throw err;
+
+    req.session.user.preferred_categories = selected;
+
+    req.flash('success', 'Preferences saved successfully!');
+    res.redirect('/recommendations');
+  });
+});
+
+app.get('/recommendations', isLoggedIn, (req, res) => {
+  const prefs = req.session.user.preferred_categories;
+
+  if (!prefs) {
+    req.flash('error', 'Please set your preferences first.');
+    return res.redirect('/preferences');
+  }
+
+  const categories = prefs.split(',');
+  const placeholders = categories.map(() => '?').join(',');
+  const sql = `SELECT * FROM events WHERE category IN (${placeholders}) ORDER BY event_date ASC`;
+
+  db.query(sql, categories, (err, results) => {
+    if (err) throw err;
+
+    res.render('recommendations', {
+      events: results,
+      preferences: categories
+    });
+  });
 });
 
 const PORT = process.env.PORT || 3000;
