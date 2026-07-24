@@ -212,20 +212,6 @@ app.post('/events/create', isLoggedIn, (req, res) => {
     });
 });
 
-// View all events
-app.get('/events/view', isLoggedIn, (req, res) => {
-  const sql = 'SELECT * FROM events ORDER BY event_date ASC, event_time ASC';
-
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.log('Error fetching events:', err);
-      req.flash('error', 'Unable to load events');
-      return res.redirect('/events');
-    }
-
-    res.render('viewEvents', { events: results });
-  });
-});
 
 // View single event details
 app.get('/events/view/:id', isLoggedIn, (req, res) => {
